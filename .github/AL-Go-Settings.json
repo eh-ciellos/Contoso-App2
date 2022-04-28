@@ -1,11 +1,11 @@
-{
+﻿{
     "type":  "PTE",
-    "templateUrl":  "https://github.com/microsoft/AL-Go-PTE@main",
+    "templateUrl":  "https://github.com/freddydk/AL-Go-PTE@main",
     "gitHubRunner":  "self-hosted",
-    "appDependencyProbingPaths": [
-        {
-            "repo":  "https://github.com/businesscentralapps/contoso-common",
-            "release_status":  "latestBuild"
-        }
-    ]
+    "appDependencyProbingPaths":  [
+                                      {
+                                          "repo":  "https://github.com/businesscentralapps/contoso-common",
+                                          "release_status":  "latestBuild"
+                                      }
+                                  ]
 }
