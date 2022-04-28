@@ -1,6 +1,7 @@
 {
     "type":  "PTE",
     "templateUrl":  "https://github.com/microsoft/AL-Go-PTE@main",
+    "gitHubRunner":  "self-hosted",
     "appDependencyProbingPaths": [
         {
             "repo":  "https://github.com/businesscentralapps/contoso-common",
