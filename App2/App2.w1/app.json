@@ -2,7 +2,7 @@
     "id":  "3653899f-5b7d-4d6c-96d4-d1c43d450382",
     "name":  "App2.w1",
     "publisher":  "Contoso",
-    "version":  "1.0.0.0",
+    "version":  "2.0.0.0",
     "brief":  "",
     "description":  "",
     "privacyStatement":  "",
@@ -11,7 +11,12 @@
     "url":  "",
     "logo":  "",
     "dependencies":  [
-
+                         {
+                             "id":  "678b9dfa-40f7-42ad-9498-cfb78e86778c",
+                             "publisher":  "Contoso",
+                             "name":  "App2.Library",
+                             "version":  "2.0.0.0"
+                         }
                      ],
     "screenshots":  [
 
