@@ -5,5 +5,12 @@
                    ],
     "testFolders":  [
 
-                    ]
+                    ],
+    "appDependencyProbingPaths":  [
+        {
+            "repo":  "https://github.com/businesscentralapps/contoso-app2",
+            "release_status":  "latestBuild",
+            "projects":  "App2"
+        }
+    ]
 }
