@@ -11,7 +11,18 @@
     "url":  "",
     "logo":  "",
     "dependencies":  [
-
+                         {
+                             "id":  "ad529cbb-1f6a-4053-8869-31aaad9e39a1",
+                             "publisher":  "Contoso",
+                             "name":  "Common",
+                             "version":  "1.0.0.0"
+                         },
+                         {
+                             "id":  "411e1f3c-78f8-4f7c-a6d2-e0d5da7d28af",
+                             "publisher":  "Contoso",
+                             "name":  "Licensing",
+                             "version":  "1.0.0.0"
+                         }
                      ],
     "screenshots":  [
 
