@@ -2,5 +2,6 @@
     "type":  "PTE",
     "templateUrl":  "https://github.com/freddydk/AL-Go-PTE@main",
     "gitHubRunner":  "self-hosted",
-    "BcContainerHelperVersion":  "dev"
+    "BcContainerHelperVersion":  "dev",
+    "GenerateDependencyArtifact":  true
 }
