@@ -21,7 +21,7 @@ defaults:
 
 jobs:
   Initialization:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     outputs:
       telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
     steps:
@@ -35,7 +35,7 @@ jobs:
           eventId: "DO0097"
 
   Analyze:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization ]
     outputs:
       settings: ${{ steps.ReadSettings.outputs.SettingsJson }}
@@ -54,13 +54,10 @@ jobs:
           includeProduction: 'Y'
 
   Deploy:
-    runs-on: [ windows-latest ] 
     needs: [ Analyze ]
     if: ${{ needs.Analyze.outputs.environmentCount > 0 }}
-    strategy:
-      matrix:
-        environment: ${{ fromJson(needs.Analyze.outputs.environments) }}
-      fail-fast: false
+    strategy: ${{ fromJson(needs.Initialization.outputs.environments) }}
+    runs-on: ${{ matrix.os }}
     name: Deploy to ${{ matrix.environment }}
     environment:
       name: ${{ matrix.environment }}
@@ -105,7 +102,7 @@ jobs:
           $environmentName = $null
           "$($envName)-EnvironmentName", "$($envName)_EnvironmentName", "EnvironmentName" | ForEach-Object {
             if (!($EnvironmentName)) {
-              $EnvironmentName = [System.Environment]::GetEnvironmentVariable($_)
+              $EnvironmentName = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Environment]::GetEnvironmentVariable($_)))
               if ($EnvironmentName) {
                 Write-Host "Using $_ secret"
               }
@@ -114,7 +111,7 @@ jobs:
           if (!($environmentName)) {
             $environmentName = '${{ steps.envName.outputs.envName }}'
           }
-          $environmentName = ($environmentName + '${{ matrix.environment }}'.SubString($envName.Length)).ToUpperInvariant()
+          $environmentName = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($environmentName + '${{ matrix.environment }}'.SubString($envName.Length)).ToUpperInvariant()))
           Write-Host "::set-output name=authContext::$authContext"
           Write-Host "set-output name=authContext::$authContext"
           Write-Host "::set-output name=environmentName::$environmentName"
@@ -133,7 +130,7 @@ jobs:
 
   PostProcess:
     if: always()
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization, Analyze, Deploy ]
     steps:
       - name: Checkout

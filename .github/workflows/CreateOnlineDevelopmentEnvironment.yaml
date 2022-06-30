@@ -25,7 +25,7 @@ defaults:
 
 jobs:
   Initialization:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     outputs:
       telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
     steps:
@@ -39,7 +39,7 @@ jobs:
           eventId: "DO0093"
 
   CreateEnvironment:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization ]
 
     steps:
@@ -62,7 +62,7 @@ jobs:
 
       - name: Check AdminCenterApiCredentials / Initiate Device Login (open to see code)
         run: |
-          $adminCenterApiCredentials = $env:adminCenterApiCredentials
+          $adminCenterApiCredentials = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($env:adminCenterApiCredentials))
           if ($adminCenterApiCredentials) {
             Write-Host "AdminCenterApiCredentials provided!"
           }
@@ -90,7 +90,7 @@ jobs:
 
   PostProcess:
     if: always()
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization,  CreateEnvironment ]
     steps:
       - name: Checkout
