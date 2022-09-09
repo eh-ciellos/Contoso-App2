@@ -3,5 +3,7 @@
     "templateUrl":  "https://github.com/freddydk/AL-Go-PTE@main",
     "runs-on":  "bc-build",
     "BcContainerHelperVersion":  "preview",
-    "GenerateDependencyArtifact":  true
+    "GenerateDependencyArtifact":  true,
+    "environments":  [ "QA" ],
+    "QA-Projects":  "App2"
 }
