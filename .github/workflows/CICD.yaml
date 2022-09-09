@@ -289,10 +289,13 @@ jobs:
           }
           $environmentName = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($environmentName + '${{ matrix.environment }}'.SubString($envName.Length)).ToUpperInvariant()))
 
+          Write-host "test -"
           $projects = [System.Environment]::GetEnvironmentVariable("$($envName)-Projects")
           if (-not $projects) {
+            Write-host "test _"
             $projects = [System.Environment]::GetEnvironmentVariable("$($envName)_Projects")
             if (-not $projects) {
+              Write-host "test secret"
               $projects = [System.Environment]::GetEnvironmentVariable('projects')
             }
           }
