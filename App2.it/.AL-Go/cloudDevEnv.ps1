@@ -36,7 +36,8 @@ $ALGoHelperPath = "$([System.IO.Path]::GetTempFileName()).ps1"
 $webClient = New-Object System.Net.WebClient
 $webClient.CachePolicy = New-Object System.Net.Cache.RequestCachePolicy -argumentList ([System.Net.Cache.RequestCacheLevel]::NoCacheNoStore)
 $webClient.Encoding = [System.Text.Encoding]::UTF8
-$webClient.DownloadFile('https://raw.githubusercontent.com/microsoft/AL-Go-Actions/preview/AL-Go-Helper.ps1', $ALGoHelperPath)
+Write-Host "Downloading AL-Go Helper script"
+$webClient.DownloadFile('https://raw.githubusercontent.com/freddydk/AL-Go-Actions/main/AL-Go-Helper.ps1', $ALGoHelperPath)
 . $ALGoHelperPath -local
 
 $baseFolder = Join-Path $PSScriptRoot ".." -Resolve
@@ -88,6 +89,9 @@ CreateDevEnv `
     -environmentName $environmentName `
     -reuseExistingEnvironment:$reuseExistingEnvironment `
     -baseFolder $baseFolder
+}
+catch {
+    Write-Host -ForegroundColor Red "Error: $($_.Exception.Message)`nStacktrace: $($_.scriptStackTrace)"
 }
 finally {
     if ($fromVSCode) {

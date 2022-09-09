@@ -12,7 +12,7 @@ on:
         required: true
         default: ''
       tag:
-        description: Tag of this release (needs to be semantic version string https://semver.org)
+        description: Tag of this release (needs to be semantic version string https://semver.org, ex. 1.0.0)
         required: true
         default: ''
       prerelease:
@@ -49,7 +49,7 @@ defaults:
 
 jobs:
   Initialization:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     outputs:
       telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
     steps:
@@ -58,12 +58,12 @@ jobs:
 
       - name: Initialize the workflow
         id: init
-        uses: microsoft/AL-Go-Actions/WorkflowInitialize@preview
+        uses: freddydk/AL-Go-Actions/WorkflowInitialize@main
         with:
           eventId: "DO0094"
 
   CreateRelease:
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization ]
     outputs:
       artifacts: ${{ steps.analyzeartifacts.outputs.artifacts }}
@@ -73,13 +73,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Read settings
-        uses: microsoft/AL-Go-Actions/ReadSettings@preview
+        uses: freddydk/AL-Go-Actions/ReadSettings@main
         with:
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
           get: TemplateUrl
 
       - name: Check for updates to AL-Go system files
-        uses: microsoft/AL-Go-Actions/CheckForUpdates@preview
+        uses: freddydk/AL-Go-Actions/CheckForUpdates@main
         with:
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
           templateUrl: ${{ env.TemplateUrl }}
@@ -101,7 +101,9 @@ jobs:
           }
           $include = @()
           $allArtifacts.artifacts | Where-Object { $_.name -like "*Apps-$($artifactsVersion)" } | ForEach-Object {
-            $include += $( [ordered]@{ "name" = $_.name; "url" = $_.archive_download_url } )
+            $atype = $_.name.SubString(0,$_.name.Length-$artifactsVersion.Length-1)
+            $atype = $atype.SubString($atype.LastIndexOf('-')+1)
+            $include += $( [ordered]@{ "name" = $_.name; "url" = $_.archive_download_url; "atype" = $atype } )
           }
           if ($include.Count -eq 0) {
             Write-Host "::Error::No artifacts found"
@@ -114,7 +116,7 @@ jobs:
 
       - name: Prepare release notes
         id: createreleasenotes
-        uses: microsoft/AL-Go-Actions/CreateReleaseNotes@preview
+        uses: freddydk/AL-Go-Actions/CreateReleaseNotes@main
         with:
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
           tag_name: '${{github.event.inputs.tag}}'
@@ -138,13 +140,16 @@ jobs:
       matrix: ${{ fromJson(needs.CreateRelease.outputs.artifacts) }}
       fail-fast: true
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Read settings
-        uses: microsoft/AL-Go-Actions/ReadSettings@preview
+        uses: freddydk/AL-Go-Actions/ReadSettings@main
         with:
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
 
       - name: Read secrets
-        uses: microsoft/AL-Go-Actions/ReadSecrets@preview
+        uses: freddydk/AL-Go-Actions/ReadSecrets@main
         env:
           secrets: ${{ toJson(secrets) }}
         with:
@@ -171,74 +176,30 @@ jobs:
           asset_name: '${{ matrix.name }}.zip'
           asset_content_type: application/zip
 
-      - name: Publish To Storage
-        id: PublishToStorage
+      - name: DeliveryContext
+        id: deliveryContext
+        if: ${{ env.StorageContext }}
         run: |
-          if ($ENV:StorageContext) {
-              try {
-                  if (get-command New-AzureStorageContext -ErrorAction SilentlyContinue) {
-                      Write-Host "Using Azure.Storage PowerShell module"
-                      Disable-AzureDataCollection
-                  }
-                  else {
-                      if (!(get-command New-AzStorageContext -ErrorAction SilentlyContinue)) {
-                          OutputError -message "When publishing to storage account, the build agent needs to have either the Azure.Storage or the Az.Storage PowerShell module installed."
-                          exit
-                      }
-                      Write-Host "Using Az.Storage PowerShell module"
-                      Set-Alias -Name New-AzureStorageContext -Value New-AzStorageContext
-                      Set-Alias -Name Get-AzureStorageContainer -Value Get-AzStorageContainer
-                      Set-Alias -Name Set-AzureStorageBlobContent -Value Set-AzStorageBlobContent
-                  }
+          $contextName = 'StorageContext'
+          $deliveryContext = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Environment]::GetEnvironmentVariable($contextName)))
+          Write-Host "::set-output name=deliveryContext::$deliveryContext"
+          Write-Host "set-output name=deliveryContext::$deliveryContext"
 
-                  $storageContext = $ENV:StorageContext
-
-                  $storageAccount = $StorageContext | ConvertFrom-Json
-                  if ($storageAccount.PSObject.Properties.Name -eq "sastoken") {
-                      $storageContext = New-AzureStorageContext -StorageAccountName $storageAccount.StorageAccountName -SasToken $storageAccount.sastoken
-                  }
-                  else {
-                      $storageContext = New-AzureStorageContext -StorageAccountName $storageAccount.StorageAccountName -StorageAccountKey $storageAccount.StorageAccountKey
-                  }
-
-                  $name = '${{ matrix.name }}'
-                  $type = ""
-                  if ($name -like '*-Apps-*') {
-                      $idx = $name.indexOf('-Apps-')
-                      $version = $name.SubString($idx+6)
-                      $projectName = $name.SubString(0,$idx) -replace "[^a-z0-9]", "-"
-                      $type = 'Apps'
-                  }
-                  elseif ($name -like '*-TestApps-*') {
-                      $idx = $name.indexOf('-TestApps-')
-                      $version = $name.SubString($idx+10)
-                      $projectName = $name.SubString(0,$idx) -replace "[^a-z0-9]", "-"
-                      $type = 'TestApps'
-                  }
-
-                  $storageContainerName = $storageAccount.ContainerName.ToLowerInvariant().replace('{project}',$projectName).ToLowerInvariant()
-                  Get-AzureStorageContainer -Context $storageContext -name $storageContainerName | Out-Null
-                  $storageBlobName = $storageAccount.BlobName.ToLowerInvariant()
-                  Write-Host "Storage Context OK"
-
-                  if ($type) {
-                      $version, "latest" | ForEach-Object {
-                          $blob = $storageBlobName.replace('{project}',$projectName).replace('{version}',$_).replace('{type}',$type).ToLowerInvariant()
-                          Write-Host "Publishing $blob to $storageContainerName"
-                          Set-AzureStorageBlobContent -Context $storageContext -Container $storageContainerName -File '${{ matrix.name }}.zip' -blob $blob -Force
-                      }
-                  }
-              }
-              catch {
-                Write-Host $_.Exception.Message
-                  Write-Host "::Error::StorageContext secret is malformed. Needs to be formatted as Json, containing StorageAccountName, ContainerName, BlobName and sastoken or storageAccountKey, which points to an existing container in a storage account."
-                  exit 1
-              }
-          }
+      - name: Deliver
+        uses: freddydk/AL-Go-Actions/Deliver@main
+        if: ${{ env.StorageContext }}
+        env:
+          deliveryContext: '${{ steps.deliveryContext.outputs.deliveryContext }}'
+        with:
+          type: 'Publish'
+          projects: '*'
+          deliveryTarget: 'Storage'
+          artifacts: '${{ github.event.inputs.appVersion }}'
+          atypes: ${{ matrix.atype }}
 
   CreateReleaseBranch:
     if: ${{ github.event.inputs.createReleaseBranch=='Y' }}
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization, CreateRelease, UploadArtifacts ]
     steps:
       - name: Checkout
@@ -254,11 +215,11 @@ jobs:
 
   UpdateVersionNumber:
     if: ${{ github.event.inputs.updateVersionNumber!='' }}
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization, CreateRelease, UploadArtifacts ]
     steps:
       - name: Update Version Number
-        uses: microsoft/AL-Go-Actions/IncrementVersionNumber@preview
+        uses: freddydk/AL-Go-Actions/IncrementVersionNumber@main
         with:
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
           versionNumber: ${{ github.event.inputs.updateVersionNumber }}
@@ -266,7 +227,7 @@ jobs:
 
   PostProcess:
     if: always()
-    runs-on: [ windows-latest ]
+    runs-on: [ bc-build ]
     needs: [ Initialization, CreateRelease, UploadArtifacts, CreateReleaseBranch, UpdateVersionNumber ]
     steps:
       - name: Checkout
@@ -274,7 +235,7 @@ jobs:
 
       - name: Finalize the workflow
         id: PostProcess
-        uses: microsoft/AL-Go-Actions/WorkflowPostProcess@preview
+        uses: freddydk/AL-Go-Actions/WorkflowPostProcess@main
         with:
           eventId: "DO0094"
           telemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
