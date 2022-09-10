@@ -315,7 +315,7 @@ jobs:
           authContext: '${{ steps.authContext.outputs.authContext }}'
         with:
           type: 'CD'
-          projects: '${{ steps.authContext.outputs.authContext }}'
+          projects: '${{ steps.authContext.outputs.projects }}'
           environmentName: '${{ steps.authContext.outputs.environmentName }}'
           artifacts: '${{ github.workspace }}\artifacts'
 
