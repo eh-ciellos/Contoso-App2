@@ -72,6 +72,10 @@ jobs:
               $deliveryTargets += @("AppSource")
             }
           }
+          Get-Item -Path (Join-Path $ENV:GITHUB_WORKSPACE ".github\DeliverTo*.ps1") | ForEach-Object {
+            $deliveryTargets += @([System.IO.Path]::GetFileNameWithoutExtension($_.Name.SubString(9)))
+          }
+          $deliveryTargets = $deliveryTargets | Select-Object -unique
           $deliveryTargetsJson = $deliveryTargets | ConvertTo-Json -Depth 99 -compress
           if ($deliveryTargets.Count -lt 2) { $deliveryTargetsJson = "[$($deliveryTargetsJson)]" }
           Write-Host "::set-output name=DeliveryTargetsJson::$deliveryTargetsJson"
@@ -306,11 +310,11 @@ jobs:
       - name: Deploy
         uses: freddydk/AL-Go-Actions/Deploy@main
         env:
-          authContext: '${{ steps.authContext.outputs.authContext }}'
+          authContext: ${{ steps.authContext.outputs.authContext }}
         with:
           type: 'CD'
-          projects: '${{ steps.authContext.outputs.projects }}'
-          environmentName: '${{ steps.authContext.outputs.environmentName }}'
+          projects: ${{ steps.authContext.outputs.projects }}
+          environmentName: ${{ steps.authContext.outputs.environmentName }}
           artifacts: '${{ github.workspace }}\artifacts'
 
   Deliver:
@@ -353,11 +357,11 @@ jobs:
       - name: Deliver
         uses: freddydk/AL-Go-Actions/Deliver@main
         env:
-          deliveryContext: '${{ steps.deliveryContext.outputs.deliveryContext }}'
+          deliveryContext: ${{ steps.deliveryContext.outputs.deliveryContext }}
         with:
           type: 'CD'
           projects: '*'
-          deliveryTarget: '${{ matrix.deliveryTarget }}'
+          deliveryTarget: ${{ matrix.deliveryTarget }}
           artifacts: '${{ github.workspace }}\artifacts'
 
   PostProcess:
