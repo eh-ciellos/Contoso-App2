@@ -6,5 +6,6 @@
     "GenerateDependencyArtifact":  true,
     "environments":  [
                          "QA"
-                     ]
+                     ],
+    "QA_Projects" = "App2"
 }
