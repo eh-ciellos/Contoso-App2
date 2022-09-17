@@ -299,8 +299,13 @@ jobs:
               $projects = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String([System.Environment]::GetEnvironmentVariable('projects')))
             }
           }
-          $buildProjects = '${{ needs.Initialization.outputs.projects }}' | ConvertFrom-Json
-          $projects = ($projects.Split(',') | Where-Object { $buildProjects -contains $_ }) -join ','
+          if ($projects -eq '') {
+            $projects = '*'
+          }
+          else {
+            $buildProjects = '${{ needs.Initialization.outputs.projects }}' | ConvertFrom-Json
+            $projects = ($projects.Split(',') | Where-Object { $buildProjects -contains $_ }) -join ','
+          }
 
           Write-Host "::set-output name=authContext::$authContext"
           Write-Host "set-output name=authContext::$authContext"
