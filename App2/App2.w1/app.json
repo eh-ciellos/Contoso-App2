@@ -2,7 +2,7 @@
     "id":  "3653899f-5b7d-4d6c-96d4-d1c43d450382",
     "name":  "App2.w1",
     "publisher":  "Contoso",
-    "version":  "2.0.0.0",
+    "version":  "2.1.0.0",
     "brief":  "",
     "description":  "",
     "privacyStatement":  "",
@@ -18,11 +18,11 @@
                              "version":  "2.0.0.0"
                          },
                          {
-                            "id":  "ad529cbb-1f6a-4053-8869-31aaad9e39a1",
-                            "publisher":  "Contoso",
-                            "name":  "Common",
-                            "version":  "1.0.0.0"
-                        }
+                             "id":  "ad529cbb-1f6a-4053-8869-31aaad9e39a1",
+                             "publisher":  "Contoso",
+                             "name":  "Common",
+                             "version":  "1.0.0.0"
+                         }
                      ],
     "screenshots":  [
 

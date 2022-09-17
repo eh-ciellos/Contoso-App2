@@ -7,14 +7,15 @@
 
                     ],
     "appDependencyProbingPaths":  [
-        {
-            "repo":  "https://github.com/businesscentralapps/contoso-app2",
-            "release_status":  "latestBuild",
-            "projects":  "App2"
-        },
-        {
-            "repo":  "https://github.com/businesscentralapps/contoso-common",
-            "release_status":  "latestBuild"
-        }
-    ]
+                                      {
+                                          "repo":  "https://github.com/businesscentralapps/contoso-app2",
+                                          "release_status":  "latestBuild",
+                                          "projects":  "App2"
+                                      },
+                                      {
+                                          "repo":  "https://github.com/businesscentralapps/contoso-common",
+                                          "release_status":  "latestBuild"
+                                      }
+                                  ],
+    "RepoVersion":  "1.1"
 }
