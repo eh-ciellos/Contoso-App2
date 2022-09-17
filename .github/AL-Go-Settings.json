@@ -7,5 +7,5 @@
     "environments":  [
                          "QA"
                      ],
-    "QA_Projects" = "App2"
+    "QA_Projects":  "App2"
 }
