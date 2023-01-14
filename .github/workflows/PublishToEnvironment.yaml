@@ -1,4 +1,4 @@
-﻿name: Publish To Environment
+name: ' Publish To Environment'
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
 
 defaults:
   run:
-    shell: PowerShell
+    shell: powershell
 
 jobs:
   Initialization:
@@ -29,18 +29,20 @@ jobs:
       environmentCount: ${{ steps.ReadSettings.outputs.EnvironmentCount }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Initialize the workflow
         id: init
         uses: freddydk/AL-Go-Actions/WorkflowInitialize@main
         with:
+          shell: powershell
           eventId: "DO0097"
 
       - name: Read settings
         id: ReadSettings
         uses: freddydk/AL-Go-Actions/ReadSettings@main
         with:
+          shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
           getEnvironments: ${{ github.event.inputs.environmentName }}
           includeProduction: 'Y'
@@ -55,28 +57,35 @@ jobs:
       name: ${{ matrix.environment }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: EnvName
         id: envName
         run: |
+          $ErrorActionPreference = "STOP"
+          Set-StrictMode -version 2.0
           $envName = '${{ matrix.environment }}'.split(' ')[0]
-          Write-Host "::set-output name=envName::$envName"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "envName=$envName"
 
       - name: Read settings
         uses: freddydk/AL-Go-Actions/ReadSettings@main
+        with:
+          shell: powershell
 
       - name: Read secrets
         uses: freddydk/AL-Go-Actions/ReadSecrets@main
         env:
           secrets: ${{ toJson(secrets) }}
         with:
+          shell: powershell
           settingsJson: ${{ env.Settings }}
-          secrets: '${{ steps.envName.outputs.envName }}-AuthContext,${{ steps.envName.outputs.envName }}_AuthContext,AuthContext,${{ steps.envName.outputs.envName }}-EnvironmentName,${{ steps.envName.outputs.envName }}_EnvironmentName,EnvironmentName,Projects'
+          secrets: '${{ steps.envName.outputs.envName }}-AuthContext,${{ steps.envName.outputs.envName }}_AuthContext,AuthContext,${{ steps.envName.outputs.envName }}-EnvironmentName,${{ steps.envName.outputs.envName }}_EnvironmentName,EnvironmentName,projects'
 
       - name: AuthContext
         id: authContext
         run: |
+          $ErrorActionPreference = "STOP"
+          Set-StrictMode -version 2.0
           $envName = '${{ steps.envName.outputs.envName }}'
           $authContext = $null
           "$($envName)-AuthContext", "$($envName)_AuthContext", "AuthContext" | ForEach-Object {
@@ -105,7 +114,7 @@ jobs:
           }
           $environmentName = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($environmentName + '${{ matrix.environment }}'.SubString($envName.Length)).ToUpperInvariant()))
 
-          $projects = [System.Environment]::GetEnvironmentVariable("$($envName)-Projects")
+          $projects = [System.Environment]::GetEnvironmentVariable("$($envName)-projects")
           if (-not $projects) {
             $projects = [System.Environment]::GetEnvironmentVariable("$($envName)_Projects")
             if (-not $projects) {
@@ -116,18 +125,19 @@ jobs:
             $projects = '*'
           }
 
-          Write-Host "::set-output name=authContext::$authContext"
-          Write-Host "set-output name=authContext::$authContext"
-          Write-Host "::set-output name=environmentName::$environmentName"
-          Write-Host "set-output name=environmentName::$environmentName"
-          Write-Host "::set-output name=projects::$projects"
-          Write-Host "set-output name=projects::$projects"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "authContext=$authContext"
+          Write-Host "authContext=$authContext"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "environmentName=$environmentName"
+          Write-Host "environmentName=$environmentName"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "projects=$projects"
+          Write-Host "projects=$projects"
 
       - name: Deploy
         uses: freddydk/AL-Go-Actions/Deploy@main
         env:
-          authContext: ${{ steps.authContext.outputs.authContext }}
+          AuthContext: ${{ steps.authContext.outputs.authContext }}
         with:
+          shell: powershell
           parentTelemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}
           type: 'Publish'
           projects: ${{ steps.authContext.outputs.projects }}
@@ -140,11 +150,12 @@ jobs:
     needs: [ Initialization, Deploy ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Finalize the workflow
         id: PostProcess
         uses: freddydk/AL-Go-Actions/WorkflowPostProcess@main
         with:
+          shell: powershell
           eventId: "DO0097"
           telemetryScopeJson: ${{ needs.Initialization.outputs.telemetryScopeJson }}

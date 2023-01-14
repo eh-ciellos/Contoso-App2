@@ -1,11 +1,11 @@
-﻿{
-    "type":  "PTE",
-    "templateUrl":  "https://github.com/freddydk/AL-Go-PTE@main",
-    "runs-on":  "bc-build",
-    "BcContainerHelperVersion":  "preview",
-    "GenerateDependencyArtifact":  true,
-    "environments":  [
-                         "QA"
-                     ],
-    "QA_Projects":  "App2"
+{
+  "type": "PTE",
+  "templateUrl": "https://github.com/freddydk/AL-Go-PTE@main",
+  "runs-on": "bc-build",
+  "BcContainerHelperVersion": "preview",
+  "GenerateDependencyArtifact": true,
+  "environments": [
+    "QA"
+  ],
+  "QA_Projects": "App2"
 }

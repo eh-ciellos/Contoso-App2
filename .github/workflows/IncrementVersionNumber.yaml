@@ -1,4 +1,4 @@
-﻿name: Increment Version Number
+name: ' Increment Version Number'
 
 on:
   workflow_dispatch:
@@ -21,24 +21,26 @@ permissions:
 
 defaults:
   run:
-    shell: PowerShell
+    shell: powershell
 
 jobs:
   IncrementVersionNumber:
     runs-on: [ bc-build ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Initialize the workflow
         id: init
         uses: freddydk/AL-Go-Actions/WorkflowInitialize@main
         with:
+          shell: powershell
           eventId: "DO0096"
 
       - name: Increment Version Number
         uses: freddydk/AL-Go-Actions/IncrementVersionNumber@main
         with:
+          shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
           project: ${{ github.event.inputs.project }}
           versionNumber: ${{ github.event.inputs.versionNumber }}
@@ -48,5 +50,6 @@ jobs:
         if: always()
         uses: freddydk/AL-Go-Actions/WorkflowPostProcess@main
         with:
+          shell: powershell
           eventId: "DO0096"
           telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
