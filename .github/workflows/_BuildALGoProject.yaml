@@ -86,6 +86,7 @@ jobs:
             get: useCompilerFolder,keyVaultCodesignCertificateName,doNotSignApps,artifact
 
         - name: Read secrets
+          if: github.event_name != 'pull_request'
           uses: freddydk/AL-Go/Actions/ReadSecrets@OnlyNeededSecrets
           with:
             shell: ${{ inputs.shell }}
