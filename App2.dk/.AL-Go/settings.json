@@ -9,7 +9,8 @@
     "appDependencyProbingPaths":  [
                                       {
                                           "repo":  "https://github.com/businesscentralapps/contoso-common",
-                                          "release_status":  "latestBuild"
+                                          "release_status":  "latestBuild",
+                                          "authTokenSecret": "ghTokenWorkflow"
                                       },
                                       {
                                           "repo":  "https://github.com/businesscentralapps/contoso-app2",
