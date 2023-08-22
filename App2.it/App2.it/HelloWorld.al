@@ -6,6 +6,7 @@ pageextension 72000 CustomerListExt extends "Customer List"
 {
     trigger OnOpenPage();
     begin
-        //Message('App published: Hello world');
+        //only App2.it
+        Message('App published: Hello world');
     end;
 }
