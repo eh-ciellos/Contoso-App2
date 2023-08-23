@@ -4,6 +4,7 @@
   "runs-on": "bc-build",
   "BcContainerHelperVersion": "preview",
   "GenerateDependencyArtifact": false,
+  "useProjectDependencies": true,
   "environments": [
     "QA"
   ],
