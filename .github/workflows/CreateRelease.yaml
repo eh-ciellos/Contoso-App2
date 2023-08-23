@@ -69,14 +69,14 @@ jobs:
 
       - name: Initialize the workflow
         id: init
-        uses: freddydk/AL-Go/Actions/WorkflowInitialize@ApiVersion
+        uses: freddydk/AL-Go/Actions/WorkflowInitialize@main
         with:
           shell: powershell
           eventId: "DO0094"
 
       - name: Read settings
         id: ReadSettings
-        uses: freddydk/AL-Go/Actions/ReadSettings@ApiVersion
+        uses: freddydk/AL-Go/Actions/ReadSettings@main
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -84,12 +84,12 @@ jobs:
 
       - name: Determine Projects
         id: determineProjects
-        uses: freddydk/AL-Go/Actions/DetermineProjectsToBuild@ApiVersion
+        uses: freddydk/AL-Go/Actions/DetermineProjectsToBuild@main
         with:
           shell: powershell
 
       - name: Check for updates to AL-Go system files
-        uses: freddydk/AL-Go/Actions/CheckForUpdates@ApiVersion
+        uses: freddydk/AL-Go/Actions/CheckForUpdates@main
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -174,7 +174,7 @@ jobs:
 
       - name: Prepare release notes
         id: createreleasenotes
-        uses: freddydk/AL-Go/Actions/CreateReleaseNotes@ApiVersion
+        uses: freddydk/AL-Go/Actions/CreateReleaseNotes@main
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
@@ -217,13 +217,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Read settings
-        uses: freddydk/AL-Go/Actions/ReadSettings@ApiVersion
+        uses: freddydk/AL-Go/Actions/ReadSettings@main
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ needs.CreateRelease.outputs.telemetryScopeJson }}
 
       - name: Read secrets
-        uses: freddydk/AL-Go/Actions/ReadSecrets@ApiVersion
+        uses: freddydk/AL-Go/Actions/ReadSecrets@main
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ needs.CreateRelease.outputs.telemetryScopeJson }}
@@ -272,7 +272,7 @@ jobs:
           Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "nuGetContext=$nuGetContext"
 
       - name: Deliver to NuGet
-        uses: freddydk/AL-Go/Actions/Deliver@ApiVersion
+        uses: freddydk/AL-Go/Actions/Deliver@main
         if: ${{ steps.nuGetContext.outputs.nuGetContext }}
         env:
           deliveryContext: ${{ steps.nuGetContext.outputs.nuGetContext }}
@@ -296,7 +296,7 @@ jobs:
           Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "storageContext=$storageContext"
 
       - name: Deliver to Storage
-        uses: freddydk/AL-Go/Actions/Deliver@ApiVersion
+        uses: freddydk/AL-Go/Actions/Deliver@main
         if: ${{ steps.storageContext.outputs.storageContext }}
         env:
           deliveryContext: ${{ steps.storageContext.outputs.storageContext }}
@@ -333,14 +333,14 @@ jobs:
     needs: [ CreateRelease, UploadArtifacts ]
     steps:
       - name: Read settings
-        uses: freddydk/AL-Go/Actions/ReadSettings@ApiVersion
+        uses: freddydk/AL-Go/Actions/ReadSettings@main
         if: github.event.inputs.useGhTokenWorkflow == 'true'
         with:
           shell: powershell
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
 
       - name: Read secrets
-        uses: freddydk/AL-Go/Actions/ReadSecrets@ApiVersion
+        uses: freddydk/AL-Go/Actions/ReadSecrets@main
         if: github.event.inputs.useGhTokenWorkflow == 'true'
         with:
           shell: powershell
@@ -366,7 +366,7 @@ jobs:
           Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "ghToken=$ghToken"
 
       - name: Update Version Number
-        uses: freddydk/AL-Go/Actions/IncrementVersionNumber@ApiVersion
+        uses: freddydk/AL-Go/Actions/IncrementVersionNumber@main
         with:
           shell: powershell
           token: ${{ steps.CalculateToken.outputs.ghToken }}
@@ -384,7 +384,7 @@ jobs:
 
       - name: Finalize the workflow
         id: PostProcess
-        uses: freddydk/AL-Go/Actions/WorkflowPostProcess@ApiVersion
+        uses: freddydk/AL-Go/Actions/WorkflowPostProcess@main
         with:
           shell: powershell
           eventId: "DO0094"
