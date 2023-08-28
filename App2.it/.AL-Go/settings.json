@@ -8,8 +8,8 @@
                     ],
     "appDependencyProbingPaths":  [
                                       {
-                                          "repo":  "https://github.com/businesscentralapps/contoso-app2",
-                                          "release_status":  "latestBuild",
+                                          "repo":  "https://github.com/eh-ciellos/contoso-app2",
+                                          "release_status":  "include",
                                           "projects":  "App2"
                                       },
                                       {
